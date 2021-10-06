@@ -46,7 +46,7 @@ def getKMeans(cluster,cluster_num,gene_id):
     kmeans = [0,0,0,0,0,0,
                 0,0,0,0,0,0,] #* 12-dimension
     #print(gene_id[cluster[0][0]][1])
-    print("cluster",cluster_num," => ",cluster[cluster_num])
+    #print("cluster",cluster_num," => ",cluster[cluster_num])
     if len(cluster[cluster_num]) == 1:
         return gene_id[cluster[cluster_num][0]]
 
@@ -72,16 +72,16 @@ def getDistance(kmeans, object):
     return dist
 
 def Reassign(obj_num, to,from_cluster_num,cluster):
-    print(obj_num)
+    print(obj_num,"이", "cluster",to,"에 추가되었습니다.")
 
     #* add to new cluster
     cluster[to].append(obj_num)#obj말고 obj의 라인 넘버를 줘야함
-    print(cluster[to])
+    #print(cluster[to])
     #* remove from old cluster
-    print(cluster[from_cluster_num])
+    #print(cluster[from_cluster_num])
     
     cluster[from_cluster_num].remove(obj_num)
-    print(cluster[from_cluster_num])
+    #print(cluster[from_cluster_num])
 
 
 
@@ -90,8 +90,8 @@ def main():
     global DIMENSION,k
     DIMENSION = 12
     k = 10
-    #filename = 'assignment2_input.txt' #500
-    filename = 'test1.txt'
+    filename = 'assignment2_input.txt' #500
+    #filename = 'test1.txt'
 
     gene_id = getDataFromFile(filename)
     #print(len(gene_id))
@@ -107,51 +107,85 @@ def main():
     #print("cluster",0,":",cluster[0][0], cluster[0][1])
 
     # * get K-means value at all clusters
-    print("=====================")
     
-    for cluster_num in range(k):
+    change = True
+    count_for_debug = 0
+    while change:
+        print("=============================================\n\n\n")
+        print(count_for_debug+1,"번 반복하였습니다.")
+        count_for_debug += 1
+        change = False
+        for cluster_num in range(k):
+                
             
+            print("Cluster : ", cluster_num)
+            print("클러스터 내 오브젝트의 개수",len(cluster[cluster_num]))
+            iter_index = 0
+            while iter_index < len(cluster[cluster_num]):
+
+                for i in range(k):
+                    if cluster_num == i:
+                        continue
+                    if not (cluster[cluster_num] and cluster[i]):
+                        continue
+                    
+                    kmeans = getKMeans(cluster,cluster_num,gene_id) # [0,1]
+                    #print(cluster[cluster_num])
+                    #print(iter_index)
+                    distance = getDistance(kmeans,gene_id[cluster[cluster_num][iter_index]]) #!
+                    #print("distance : ",distance) # * distance between k-means and an object in a cluster
+                    #print("kmeans :",kmeans)
+                    
+                    #print("cluster num: ",cluster_num,cluster[cluster_num],"with cluster ", i)
+                    if cluster[cluster_num] and cluster[i]:
+                        
+                        kmeans = getKMeans(cluster,i,gene_id)#* i cluster의 K-Means
+                        
+                    
+                        
+                        dist = getDistance(kmeans,gene_id[cluster[cluster_num][iter_index]]) # * i cluster의 K-Means까지의 Distance
+                        
+                        #print("dist : ",dist)
+                        #print(cluster[cluster_num][iter_index],"오브젝트에 대하여 ", end=" ")
+                        #print("cluster",cluster_num,"의 K-Means와","cluster",i,"의 K-Means중 가까운 것을 찾는 중입니다.")
+                        if dist < distance:
+                            print(cluster[cluster_num][iter_index],"오브젝트에 대하여 ", end=" ")
+                            print("cluster",cluster_num,"의 K-Means와","cluster",i,"의 K-Means중 가까운 것을 찾는 중입니다.")
+                            print("거리가 더 가까운 K-Means를 찾았습니다.")
+                            #print("shorter distance : ", dist)
+                            #print(">cluster : ", i)
+                            obj_num = cluster[cluster_num][iter_index]
+                            #print("obj number>>",obj_num)
+                            to = i
+                            Reassign(obj_num,to,cluster_num,cluster)
+                            print("\n")
+                            change = True
+                            iter_index -= 1
+                            if iter_index < 0:
+                                iter_index = 0
+                            #! in here, Have to change to shortest cluster
+                    
+                    
+                    else:
+                        continue
+
+                iter_index += 1
+                
+        # cluster_num = 1
+        # kmeans = getKMeans(cluster,cluster_num,gene_id)
+        # distance = getDistance(kmeans,gene_id[cluster[cluster_num][0]])
+        # print(distance)
+        #? and then, find the shortest distance with other K-Means of other clusters.
+        #? after finding, Re-assign objects to clusters based on the distance that I've found.
         
-        print("from cluster : ", cluster_num)
-        print("=====================\n")
         
-        for i in range(k):
-            if cluster_num == i:
-                continue
-            if not (cluster[cluster_num] and cluster[i]):
-                continue
-            kmeans = getKMeans(cluster,cluster_num,gene_id) # [0,1]
-            distance = getDistance(kmeans,gene_id[cluster[cluster_num][0]]) #!여기서는 [0]만 비교하였음. 추후 [1]도 추가해야함
-            print("distance : ",distance) # * distance between k-means and an object in a cluster
-            #print("kmeans :",kmeans)
-            
-            print("cluster num: ",cluster_num,cluster[cluster_num],"with cluster ", i)
-            if cluster[cluster_num] and cluster[i]:
-                kmeans = getKMeans(cluster,i,gene_id)
-                dist = getDistance(kmeans,gene_id[cluster[cluster_num][0]])
-                print("dist : ",dist)
-            else:
-                continue
-            if dist < distance:
-                print("shorter distance : ", dist)
-                print(">cluster : ", i)
-                obj_num = cluster[cluster_num][0]
-                print("obj number>>",obj_num)
-                to = i
-                Reassign(obj_num,to,cluster_num,cluster)
-                #! in here, Have to change to shortest cluster
-    # cluster_num = 1
-    # kmeans = getKMeans(cluster,cluster_num,gene_id)
-    # distance = getDistance(kmeans,gene_id[cluster[cluster_num][0]])
-    # print(distance)
-    #? and then, find the shortest distance with other K-Means of other clusters.
-    #? after finding, Re-assign objects to clusters based on the distance that I've found.
-    
-    #! now problem : empty cluster is.
 
     #print(cluster)
+    print("\n\n")
     for i in range(k):
-        print(i," : ", cluster[i])
+        cluster[i].sort()
+        print(i,"번 클러스터 :","SIZE: ",len(cluster[i]), cluster[i])
+        print("\n")
     print("Time Elapsed : ", time.time() - start_time)
 
 if __name__ == '__main__':
