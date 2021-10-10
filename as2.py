@@ -3,7 +3,6 @@ Data Mining Assignment 2, K-Means
 2016253072
 명수환(Myeong Suhwan)
 '''
-
 import time
 import math
 
@@ -64,10 +63,8 @@ def getDistance(kmeans, object):
         tmp = math.pow(dist_dimesion,2)
         dist += tmp
     dist = math.sqrt(dist)
-    #print(dist)
     dist = "{:.3f}".format(dist)
-    #print(type(dist))
-    #print(float(dist))
+    
     return float(dist)
 
 def Reassign(obj_num, to,from_cluster_num,cluster):
@@ -121,11 +118,9 @@ def main():
     isChanged = True # * default value is True
     count_for_debug = 0
     while isChanged:  
-            
-        print("=============================================")
         
         count_for_debug += 1
-        print(count_for_debug,"번 반복하였습니다.")
+        print("[*]",count_for_debug,"번 반복하였습니다.")
         isChanged = False
         for cluster_num in range(k): # * A cluster 
                 
@@ -139,7 +134,7 @@ def main():
             iter_index = 0
             while iter_index < len(cluster[cluster_num]): # * iter_index is index of an element of a cluster
                 
-                distance = getDistance(kmeans1,gene_id[cluster[cluster_num][iter_index]]) #! 
+                distance = getDistance(kmeans1,gene_id[cluster[cluster_num][iter_index]])
                 #print("클러스터 ",cluster_num,"의 오브젝트 : ", cluster[cluster_num][iter_index])
                 #print("거리: ",distance)
                 for i in range(k): # * other cluster to compare
@@ -165,14 +160,11 @@ def main():
                             # print("비교할 Cluster",i,"에서 K-Means까지의","Distance : ", dist)
                             # print(dist," < ", distance,"이므로 이동합니다.")
                             
-                            
                             obj_num = cluster[cluster_num][iter_index]
-                            
                             to = i
-                            Reassign(obj_num,to,cluster_num,cluster)
-                            
+                            Reassign(obj_num,to,cluster_num,cluster)                            
                             isChanged = True
-                            
+
                             iter_index -= 1
                             if iter_index < 0:
                                 iter_index = 0
